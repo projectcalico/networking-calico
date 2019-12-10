@@ -389,7 +389,7 @@ class EtcdWatcher(object):
         self._stopped = True
 
 
-def intern_dict(d, fields_to_intern=None):
+def intern_dict(d):
     """intern_dict
 
     Return a copy of the input dict where all its string/unicode keys
@@ -399,11 +399,26 @@ def intern_dict(d, fields_to_intern=None):
     to str by calling .encode("utf8") on each string.
 
     :param dict[StringTypes,...] d: Input dict.
-    :param set[StringTypes] fields_to_intern: set of field names whose values
-        should also be interned.
     :return: new dict with interned keys/values.
     """
-    fields_to_intern = fields_to_intern or set()
+    fields_to_intern = set([
+        # Endpoint dicts.  It doesn't seem worth interning items like the MAC
+        # address or TAP name, which are rarely (if ever) shared.
+        "profile_id",
+        "profile_ids",
+        "state",
+        "ipv4_gateway",
+        "ipv6_gateway",
+
+        # Rules dicts.
+        "protocol",
+        "!protocol",
+        "src_tag",
+        "!src_tag",
+        "dst_tag",
+        "!dst_tag",
+        "action",
+    ])
     out = {}
     for k, v in d.items():
         # We can't intern unicode strings, as returned by etcd but all our
@@ -434,29 +449,7 @@ def intern_list(l):
     return out
 
 
-# Intern JSON keys as we load them to reduce occupancy.
-FIELDS_TO_INTERN = set([
-    # Endpoint dicts.  It doesn't seem worth interning items like the MAC
-    # address or TAP name, which are rarely (if ever) shared.
-    "profile_id",
-    "profile_ids",
-    "state",
-    "ipv4_gateway",
-    "ipv6_gateway",
-
-    # Rules dicts.
-    "protocol",
-    "!protocol",
-    "src_tag",
-    "!src_tag",
-    "dst_tag",
-    "!dst_tag",
-    "action",
-])
-json_decoder = json.JSONDecoder(
-    object_hook=functools.partial(intern_dict,
-                                  fields_to_intern=FIELDS_TO_INTERN)
-)
+json_decoder = json.JSONDecoder(object_hook=intern_dict)
 
 
 def safe_decode_json(raw_json, log_tag=None):
