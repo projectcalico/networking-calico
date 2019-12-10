@@ -497,14 +497,17 @@ class Lib(object):
             _log.info("T=%s", self.current_time)
 
             # Wake up all sleepers that should now wake up.
+            queues_to_wake = []
             for queue in self.sleepers.keys():
                 if self.sleepers[queue] <= self.current_time:
                     _log.info("T=%s >= %s: %s: Wake up!",
                               self.current_time,
                               self.sleepers[queue],
                               queue.stack)
-                    del self.sleepers[queue]
-                    queue.put_nowait(TIMEOUT_VALUE)
+                    queues_to_wake.append(queue)
+            for queue in queues_to_wake:
+                del self.sleepers[queue]
+                queue.put_nowait(TIMEOUT_VALUE)
 
             # Allow woken (and possibly other) threads to run.
             self.real_eventlet_sleep(REAL_EVENTLET_SLEEP_TIME)
