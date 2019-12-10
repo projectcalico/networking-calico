@@ -405,7 +405,7 @@ def intern_dict(d, fields_to_intern=None):
     """
     fields_to_intern = fields_to_intern or set()
     out = {}
-    for k, v in d.iteritems():
+    for k, v in d.items():
         # We can't intern unicode strings, as returned by etcd but all our
         # keys should be ASCII anyway.  Use the utf8 encoding just in case.
         k = intern(k.encode("utf8"))

@@ -560,7 +560,7 @@ class SubnetWatcher(etcdutils.EtcdWatcher):
 
     def get_subnet_id_for_addr(self, ip_str, network_id):
         ip_addr = netaddr.IPAddress(ip_str)
-        for subnet_id, subnet_data in self.subnets_by_id.iteritems():
+        for subnet_id, subnet_data in self.subnets_by_id.items():
             # If we know we're looking within a given Neutron network, only
             # consider this subnet if it belongs to that network.
             if network_id and subnet_data['network_id'] != network_id:
