@@ -130,7 +130,7 @@ class _TestPathDispatcherBase(unittest.TestCase):
         m_result.key = "/a"
         m_result.action = "unknown"
         self.dispatcher.handle_event(m_result)
-        for handlers in self.handlers.itervalues():
+        for handlers in self.handlers.values():
             for key, handler in handlers.items():
                 self.assertFalse(handler.called,
                                  msg="Unexpected handler called: %s" % key)
