@@ -19,6 +19,7 @@ import json
 import re
 
 from etcd3gw.exceptions import ConnectionFailedError
+from networking_calico.common import intern_string
 from networking_calico.compat import log
 from networking_calico import etcdv3
 from networking_calico.monotonic import monotonic_time
@@ -421,12 +422,10 @@ def intern_dict(d):
     ])
     out = {}
     for k, v in d.items():
-        # We can't intern unicode strings, as returned by etcd but all our
-        # keys should be ASCII anyway.  Use the utf8 encoding just in case.
-        k = intern(k.encode("utf8"))
+        k = intern_string(k)
         if k in fields_to_intern:
             if _is_string_instance(v):
-                v = intern(v.encode("utf8"))
+                v = intern_string(v)
             elif isinstance(v, list):
                 v = intern_list(v)
         out[k] = v
@@ -437,14 +436,12 @@ def intern_list(l):
     """intern_list
 
     Returns a new list with interned versions of the input list's contents.
-
-    Non-strings are copied to the new list verbatim.  Returned strings are
-    encoded using .encode("utf8").
+    Non-strings are copied to the new list verbatim.
     """
     out = []
     for item in l:
         if _is_string_instance(item):
-            item = intern(item.encode("utf8"))
+            item = intern_string(item)
         out.append(item)
     return out
 

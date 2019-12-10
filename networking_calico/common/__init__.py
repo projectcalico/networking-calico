@@ -55,3 +55,14 @@ def mkdir_p(path):
 class ValidationFailed(Exception):
     """Class used for data validation exceptions."""
     pass
+
+
+# Interning for Unicode strings.
+try:
+    from sys import intern
+except ImportError:
+    pass
+
+
+def intern_string(s):
+    return intern(str(s.encode("utf8")))

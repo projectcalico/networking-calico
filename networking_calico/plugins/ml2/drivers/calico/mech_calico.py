@@ -60,6 +60,7 @@ import neutron.plugins.ml2.rpc as rpc
 
 # Calico imports.
 from networking_calico.common import config as calico_config
+from networking_calico.common import intern_string
 from networking_calico.compat import cfg
 from networking_calico.compat import constants
 from networking_calico.compat import db_exc
@@ -444,7 +445,7 @@ class CalicoMechanismDriver(mech_agent.SimpleAgentMechanismDriverBase):
         :param status_dict: new status dict for the port or None if the
                status was deleted.
         """
-        port_status_key = (intern(hostname.encode("utf8")), port_id)
+        port_status_key = (intern_string(hostname), port_id)
         # Unwrap the dict around the actual status.
         if status_dict is not None:
             # Update.
@@ -492,7 +493,7 @@ class CalicoMechanismDriver(mech_agent.SimpleAgentMechanismDriverBase):
                     # of the status strings.  We know the .encode() is safe
                     # because we just checked this was one of our expected
                     # strings.
-                    interned_status = intern(calico_status.encode("utf8"))
+                    interned_status = intern_string(calico_status)
                     self._port_status_cache[port_status_key] = interned_status
                 else:
                     LOG.error("Unknown port status: %r", calico_status)
