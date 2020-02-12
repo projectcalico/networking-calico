@@ -18,7 +18,7 @@ import functools
 import json
 import re
 
-from etcd3gw.exceptions import ConnectionFailedError
+from etcd3gw.exceptions import ConnectionFailedError, Etcd3Exception
 from networking_calico.compat import log
 from networking_calico import etcdv3
 from networking_calico.monotonic import monotonic_time
@@ -195,6 +195,11 @@ class EtcdWatcher(object):
                 LOG.warning("etcd not available, will retry in 5s")
                 eventlet.sleep(5)
                 continue
+            except Etcd3Exception as e:
+                # Unhandled exception. Log the problem and retry
+                LOG.error("error while loading snapshop: %r. Will retry in 5s", e)
+                eventlet.sleep(5)
+                continue 
 
             # Allow subclass to do post-snapshot reconciliation.
             LOG.debug("%s Done loading snapshot, calling post snapshot hook",
