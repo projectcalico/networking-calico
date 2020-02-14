@@ -5,6 +5,10 @@ ifeq ($(LOCAL_BUILD),true)
 	GIT_VERSION = $(shell git describe --tags --dirty --always)-dev-build
 endif
 
+# Default target, called from the package building process.
+build:
+	# Nothing to do.
+
 ###############################################################################
 # Release
 ###############################################################################
