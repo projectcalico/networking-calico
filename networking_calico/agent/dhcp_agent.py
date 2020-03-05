@@ -28,7 +28,10 @@ from neutron.agent.dhcp.agent import DhcpAgent
 from neutron.agent.dhcp_agent import register_options
 from neutron.agent.linux import dhcp
 from neutron.common import config as common_config
-from neutron.common import constants as neutron_constants
+try:
+    from neutron.common import constants as neutron_constants
+except ImportError:
+    from neutron_lib import constants as neutron_constants
 try:
     from neutron.conf.agent import common as config
 except ImportError:
@@ -105,6 +108,8 @@ class FakePlugin(object):
                                       self.get_device_id(network))
         """
         LOG.debug("release_dhcp_port: %s %s", network_id, device_id)
+
+    get_networks = None
 
 
 def empty_network(network_id=NETWORK_ID):
