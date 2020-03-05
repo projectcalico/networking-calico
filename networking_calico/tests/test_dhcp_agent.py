@@ -376,12 +376,12 @@ class TestDnsmasqRouted(base.BaseTestCase):
     @mock.patch(commonutils)
     def test_build_cmdline(self, commonutils, device_mgr_cls):
         v4subnet = mock.Mock()
-        v4subnet.id = 'subnet-1'
+        v4subnet.id = 'v4subnet-1'
         v4subnet.enable_dhcp = True
         v4subnet.ip_version = 4
         v4subnet.cidr = '10.28.0.0/24'
         v6subnet = mock.Mock()
-        v6subnet.id = 'subnet-1'
+        v6subnet.id = 'v6subnet-1'
         v6subnet.enable_dhcp = True
         v6subnet.ip_version = 6
         v6subnet.cidr = '2001:db8:1::/80'
@@ -399,7 +399,10 @@ class TestDnsmasqRouted(base.BaseTestCase):
         network.non_local_subnets = []
         network.get.side_effect = lambda key, dflt=None: dflt
         device_mgr_cls.return_value.driver.bridged = False
-        dhcp_driver = DnsmasqRouted(cfg.CONF, network, None)
+        dhcp_driver = DnsmasqRouted(cfg.CONF,
+                                    network,
+                                    None,
+                                    plugin=FakePlugin())
         with mock.patch.object(dhcp_driver, '_get_value_from_conf_file') as gv:
             gv.return_value = 'ns-dhcp'
             cmdline = dhcp_driver._build_cmdline_callback('/run/pid_file')
@@ -416,11 +419,12 @@ class TestDnsmasqRouted(base.BaseTestCase):
             '--dhcp-match=set:ipxe,175',
             '--bind-dynamic',
             '--interface=ns-dhcp',
-            '--dhcp-range=set:tag0,10.28.0.0,static,255.255.255.0,86400s',
+            '--dhcp-range=set:subnet-v4subnet-1,10.28.0.0' +
+            ',static,255.255.255.0,86400s',
             '--dhcp-lease-max=16777216',
             '--conf-file=',
-            '--domain=openstacklocal',
-            '--dhcp-range=set:tag1,2001:db8:1::,static,off-link,80,86400s',
+            '--dhcp-range=set:subnet-v6subnet-1,2001:db8:1::' +
+            ',static,off-link,80,86400s',
             '--enable-ra',
             '--interface=tap1',
             '--interface=tap2',
