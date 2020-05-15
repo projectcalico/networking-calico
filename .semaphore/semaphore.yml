@@ -19,7 +19,8 @@ blocks:
             - ln -s . networking-calico
             - sudo apt-get install -y tox python-all-dev python3-all-dev
             - export LIBVIRT_TYPE=qemu
-            - export NETWORKING_CALICO_SHA=${SEMAPHORE_GIT_SHA}
+            - set
+            - export NETWORKING_CALICO_SHA=${SEMAPHORE_GIT_PR_SHA}
             - TEMPEST=true TEMPEST_BRANCH=23.0.0 DEVSTACK_BRANCH=stable/rocky DEVSTACK_REPO=https://github.com/neiljerram/devstack.git ./devstack/bootstrap.sh
             - source ./devstack/devstackgaterc
             - cd /opt/stack/tempest
