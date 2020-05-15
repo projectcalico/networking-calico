@@ -113,7 +113,7 @@ fi
 
 # Remember the current directory.
 ncdir=`pwd`
-ncref=`git rev-parse --abbrev-ref HEAD`
+#ncref=`git rev-parse --abbrev-ref HEAD`
 popd
 
 # Enable IPv4 and IPv6 forwarding.
