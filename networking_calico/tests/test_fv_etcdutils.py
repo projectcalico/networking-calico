@@ -53,15 +53,19 @@ class TestFVEtcdutils(unittest.TestCase):
         self.etcd_server_running = True
 
     def wait_etcd_ready(self):
+        # Might take a really long time if the etcd image needs to be
+        # downloaded...
         self.assertTrue(self.etcd_server_running)
         ready = False
-        for ii in range(5):
+        sleep_time = 1
+        for ii in range(10):
             try:
                 etcdv3.get_status()
                 ready = True
                 break
             except Exception:
-                eventlet.sleep(1)
+                eventlet.sleep(sleep_time)
+                sleep_time *= 2
         self.assertTrue(ready)
 
     def stop_etcd_server(self):
