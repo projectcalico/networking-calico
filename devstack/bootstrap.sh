@@ -91,6 +91,13 @@ sudo apt-get -y install git
 test -e networking-calico || \
     git clone https://github.com/projectcalico/networking-calico
 pushd networking-calico
+if [ "$NETWORKING_CALICO_SHA" ]; then
+    git checkout -b devstack-test $NETWORKING_CALICO_SHA
+    git checkout master
+    git config user.name "someone"
+    git config user.email "someone@someplace.com"
+    git merge --no-edit devstack-test
+fi
 
 # If TEST_GERRIT_CHANGE has been specified, merge that change from Gerrit.
 if [ -n "$TEST_GERRIT_CHANGE" ]; then
@@ -106,7 +113,7 @@ fi
 
 # Remember the current directory.
 ncdir=`pwd`
-ncref=`git rev-parse --abbrev-ref HEAD`
+#ncref=`git rev-parse --abbrev-ref HEAD`
 popd
 
 # Enable IPv4 and IPv6 forwarding.
