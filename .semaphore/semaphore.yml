@@ -22,7 +22,7 @@ blocks:
             - sudo apt-get install -y tox python-all-dev python3-all-dev
             - export LIBVIRT_TYPE=qemu
             - export UPPER_CONSTRAINTS_FILE=https://releases.openstack.org/constraints/upper/rocky
-            - TEMPEST=true TEMPEST_BRANCH=23.0.0 DEVSTACK_BRANCH=stable/rocky DEVSTACK_REPO=https://github.com/neiljerram/devstack.git ./devstack/bootstrap.sh
+            - TEMPEST=true TEMPEST_BRANCH=23.0.0 DEVSTACK_BRANCH=stable/rocky ./devstack/bootstrap.sh
             - source ./devstack/devstackgaterc
             - cd /opt/stack/tempest
             - tox -eall -- $DEVSTACK_GATE_TEMPEST_REGEX --concurrency=$TEMPEST_CONCURRENCY
