@@ -29,6 +29,7 @@ from functools import wraps
 import inspect
 import os
 import re
+import sys
 import uuid
 
 # OpenStack imports.
@@ -570,8 +571,19 @@ class CalicoMechanismDriver(mech_agent.SimpleAgentMechanismDriverBase):
                 self.db.update_port_status(admin_context,
                                            port_id,
                                            neutron_status)
-        except (db_exc.DBError,
-                sa_exc.SQLAlchemyError) as e:
+        except db_exc.DBError as e:
+            # Defensive: pre-Liberty, it was easy to cause deadlocks here if
+            # any code path (in another loaded plugin, say) failed to take
+            # the db-access lock.  Post-Liberty, we shouldn't see any
+            # exceptions here because update_port_status() is wrapped with a
+            # retry decorator in the neutron code.
+            LOG.warning("Failed to update port status for %s due to %r.",
+                        port_id, e)
+            # Queue up a retry after a delay.
+            eventlet.spawn_after(PORT_UPDATE_RETRY_DELAY_SECS,
+                                 self._retry_port_status_update,
+                                 port_status_key)
+        except sa_exc.SQLAlchemyError as e:
             # Defensive: pre-Liberty, it was easy to cause deadlocks here if
             # any code path (in another loaded plugin, say) failed to take
             # the db-access lock.  Post-Liberty, we shouldn't see any
@@ -597,7 +609,14 @@ class CalicoMechanismDriver(mech_agent.SimpleAgentMechanismDriverBase):
     def _update_port_status_has_host_param(self):
         """Check whether update_port_status() supports the host parameter."""
         if self._cached_update_port_status_has_host_param is None:
-            args, _, varkw, _ = inspect.getargspec(self.db.update_port_status)
+            if sys.version_info[0] == 3:
+                # Python 3
+                full_arg_spec = inspect.getfullargspec(self.db.update_port_status)
+                args = full_arg_spec.args
+                varkw = full_arg_spec.varkw
+            else:
+                # Python 2
+                args, _, varkw, _ = inspect.getargspec(self.db.update_port_status)
             has_host_param = varkw or "host" in args
             self._cached_update_port_status_has_host_param = has_host_param
             LOG.info("update_port_status() supports host arg: %s",

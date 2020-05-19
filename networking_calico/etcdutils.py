@@ -369,11 +369,17 @@ class EtcdWatcher(object):
                 # - response.key
                 # - response.value
                 key = event['kv']['key']
+                value = event['kv'].get('value', '')
+                try:
+                    key = key.decode()
+                    value = value.decode()
+                except AttributeError:
+                    pass
                 mod_revision = int(event['kv'].get('mod_revision', '0'))
                 response = Response(
                     action=event.get('type', 'SET').lower(),
                     key=key,
-                    value=event['kv'].get('value', ''),
+                    value=value,
                     mod_revision=mod_revision,
                 )
                 LOG.info("Event: %s", response)

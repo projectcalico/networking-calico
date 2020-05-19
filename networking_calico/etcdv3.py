@@ -292,7 +292,10 @@ def get_prefix(prefix, revision=None):
     tuples = []
     for result in results:
         value, item = result
-        t = (item['key'], value, item['mod_revision'])
+        try:
+            t = (item['key'].decode(), value.decode(), item['mod_revision'])
+        except AttributeError:
+            t = (item['key'], value, item['mod_revision'])
         tuples.append(t)
     return tuples
 

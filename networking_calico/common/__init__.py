@@ -65,4 +65,4 @@ except ImportError:
 
 
 def intern_string(s):
-    return intern(str(s.encode("utf8")))
+    return intern(s)
