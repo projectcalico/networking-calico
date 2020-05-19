@@ -1,0 +1,439 @@
+-*- mode: compilation; default-directory: "~/go/src/github.com/projectcalico/networking-calico/" -*-
+Compilation started at Tue May 19 14:28:04
+
+2to3-2.7 -w .
+RefactoringTool: Skipping optional fixer: buffer
+RefactoringTool: Skipping optional fixer: idioms
+RefactoringTool: Skipping optional fixer: set_literal
+RefactoringTool: Skipping optional fixer: ws_comma
+RefactoringTool: No changes to ./setup.py
+RefactoringTool: No changes to ./networking_calico/compat.py
+RefactoringTool: Refactored ./networking_calico/datamodel_v1.py
+--- ./networking_calico/datamodel_v1.py	(original)
++++ ./networking_calico/datamodel_v1.py	(refactored)
+@@ -21,6 +21,7 @@
+ changing these, we still need to consider upgrading an existing
+ Calico/OpenStack deployment.
+ """
++import sys
+
+ # Key used for leader election by Neutron mechanism drivers.
+ NEUTRON_ELECTION_KEY = "/calico/openstack/v1/neutron_election"
+@@ -41,8 +42,8 @@
+         # We intern these strings since they can occur in many IDs.  The
+         # host and orchestrator are trivially repeated for all endpoints
+         # on a host.  The others get repeated over time.
+-        self.host = intern(host.encode("utf8"))
+-        self.endpoint = intern(endpoint.encode("utf8"))
++        self.host = sys.intern(host.encode("utf8"))
++        self.endpoint = sys.intern(endpoint.encode("utf8"))
+
+     def __str__(self):
+         return self.__class__.__name__ + ("<%s>" % self.endpoint)
+@@ -63,8 +64,8 @@
+         # host and orchestrator are trivially repeated for all endpoints
+         # on a host.  The others get repeated over time.
+         super(WloadEndpointId, self).__init__(host, endpoint)
+-        self.orchestrator = intern(orchestrator.encode("utf8"))
+-        self.workload = intern(workload.encode("utf8"))
++        self.orchestrator = sys.intern(orchestrator.encode("utf8"))
++        self.workload = sys.intern(workload.encode("utf8"))
+
+     def __repr__(self):
+         return self.__class__.__name__ + ("(%r,%r,%r,%r)" % (self.host,
+RefactoringTool: No changes to ./networking_calico/datamodel_v2.py
+RefactoringTool: No changes to ./networking_calico/datamodel_v3.py
+RefactoringTool: Refactored ./networking_calico/etcdutils.py
+--- ./networking_calico/etcdutils.py	(original)
++++ ./networking_calico/etcdutils.py	(refactored)
+@@ -22,6 +22,7 @@
+ from networking_calico.compat import log
+ from networking_calico import etcdv3
+ from networking_calico.monotonic import monotonic_time
++import sys
+
+ LOG = log.getLogger(__name__)
+
+@@ -45,7 +46,7 @@
+ # https://stackoverflow.com/questions/4232111/stringtype-and-nonetype-in-python3-x.
+ def _is_string_instance(obj):
+     try:
+-        return isinstance(obj, basestring)
++        return isinstance(obj, str)
+     except NameError:
+         return isinstance(obj, str)
+
+@@ -405,13 +406,13 @@
+     """
+     fields_to_intern = fields_to_intern or set()
+     out = {}
+-    for k, v in d.iteritems():
++    for k, v in d.items():
+         # We can't intern unicode strings, as returned by etcd but all our
+         # keys should be ASCII anyway.  Use the utf8 encoding just in case.
+-        k = intern(k.encode("utf8"))
++        k = sys.intern(k.encode("utf8"))
+         if k in fields_to_intern:
+             if _is_string_instance(v):
+-                v = intern(v.encode("utf8"))
++                v = sys.intern(v.encode("utf8"))
+             elif isinstance(v, list):
+                 v = intern_list(v)
+         out[k] = v
+@@ -429,7 +430,7 @@
+     out = []
+     for item in l:
+         if _is_string_instance(item):
+-            item = intern(item.encode("utf8"))
++            item = sys.intern(item.encode("utf8"))
+         out.append(item)
+     return out
+
+RefactoringTool: No changes to ./networking_calico/etcdv3.py
+RefactoringTool: No changes to ./networking_calico/logutils.py
+RefactoringTool: No changes to ./networking_calico/monotonic.py
+RefactoringTool: No changes to ./networking_calico/timestamp.py
+RefactoringTool: Refactored ./networking_calico/agent/dhcp_agent.py
+--- ./networking_calico/agent/dhcp_agent.py	(original)
++++ ./networking_calico/agent/dhcp_agent.py	(refactored)
+@@ -279,8 +279,7 @@
+         dns_assignments = []
+         fqdn = annotations.get(datamodel_v3.ANN_KEY_FQDN)
+         network_id = annotations.get(datamodel_v3.ANN_KEY_NETWORK_ID)
+-        allowedIps = map(lambda e: e.split('/')[0],
+-                         endpoint.get('allowedIps', []))
++        allowedIps = [e.split('/')[0] for e in endpoint.get('allowedIps', [])]
+         for addrm in endpoint['ipNetworks']:
+             ip_addr = addrm.split('/')[0]
+             if ip_addr in allowedIps:
+@@ -370,7 +369,7 @@
+             # otherwise we would have already found it when searching by
+             # subnet_id above.)
+             assert new_subnets
+-            network_id = new_subnets.values()[0]['network_id']
++            network_id = list(new_subnets.values())[0]['network_id']
+             net = self.agent.cache.get_network_by_id(network_id)
+             LOG.debug("Existing network model by network ID: %s", net)
+
+@@ -391,7 +390,7 @@
+             # Add the new subnets into the NetModel.
+             assert net
+             net.subnets = [s for s in net.subnets
+-                           if s.id not in new_subnets] + new_subnets.values()
++                           if s.id not in new_subnets] + list(new_subnets.values())
+
+             # Add (or update) the NetModel in the cache.
+             LOG.debug("Net: %s", net)
+@@ -560,7 +559,7 @@
+
+     def get_subnet_id_for_addr(self, ip_str, network_id):
+         ip_addr = netaddr.IPAddress(ip_str)
+-        for subnet_id, subnet_data in self.subnets_by_id.iteritems():
++        for subnet_id, subnet_data in self.subnets_by_id.items():
+             # If we know we're looking within a given Neutron network, only
+             # consider this subnet if it belongs to that network.
+             if network_id and subnet_data['network_id'] != network_id:
+RefactoringTool: No changes to ./networking_calico/agent/linux/dhcp.py
+RefactoringTool: No changes to ./networking_calico/agent/linux/interface.py
+RefactoringTool: Refactored ./networking_calico/common/__init__.py
+--- ./networking_calico/common/__init__.py	(original)
++++ ./networking_calico/common/__init__.py	(refactored)
+@@ -21,6 +21,7 @@
+ import netaddr
+ import netaddr.core
+ import os
++import sys
+
+
+ def validate_cidr(cidr, version):
+@@ -41,7 +42,7 @@
+ def canonicalise_cidr(cidr, version):
+     assert cidr is not None
+     nw = netaddr.IPNetwork(cidr, version=version)
+-    return intern(str(nw))
++    return sys.intern(str(nw))
+
+
+ def mkdir_p(path):
+RefactoringTool: No changes to ./networking_calico/common/config.py
+RefactoringTool: No changes to ./networking_calico/plugins/calico/plugin.py
+RefactoringTool: No changes to ./networking_calico/plugins/ml2/drivers/calico/election.py
+RefactoringTool: No changes to ./networking_calico/plugins/ml2/drivers/calico/endpoints.py
+RefactoringTool: Refactored ./networking_calico/plugins/ml2/drivers/calico/mech_calico.py
+--- ./networking_calico/plugins/ml2/drivers/calico/mech_calico.py	(original)
++++ ./networking_calico/plugins/ml2/drivers/calico/mech_calico.py	(refactored)
+@@ -36,6 +36,7 @@
+ from eventlet.queue import PriorityQueue
+ from eventlet.semaphore import Semaphore
+ from neutron.agent import rpc as agent_rpc
++import sys
+
+ try:
+     from neutron_lib.agent import topics
+@@ -444,7 +445,7 @@
+         :param status_dict: new status dict for the port or None if the
+                status was deleted.
+         """
+-        port_status_key = (intern(hostname.encode("utf8")), port_id)
++        port_status_key = (sys.intern(hostname.encode("utf8")), port_id)
+         # Unwrap the dict around the actual status.
+         if status_dict is not None:
+             # Update.
+@@ -492,7 +493,7 @@
+                     # of the status strings.  We know the .encode() is safe
+                     # because we just checked this was one of our expected
+                     # strings.
+-                    interned_status = intern(calico_status.encode("utf8"))
++                    interned_status = sys.intern(calico_status.encode("utf8"))
+                     self._port_status_cache[port_status_key] = interned_status
+                 else:
+                     LOG.error("Unknown port status: %r", calico_status)
+RefactoringTool: No changes to ./networking_calico/plugins/ml2/drivers/calico/policy.py
+RefactoringTool: Refactored ./networking_calico/plugins/ml2/drivers/calico/status.py
+--- ./networking_calico/plugins/ml2/drivers/calico/status.py	(original)
++++ ./networking_calico/plugins/ml2/drivers/calico/status.py	(refactored)
+@@ -99,7 +99,7 @@
+
+     def _post_snapshot_hook(self, old_endpoints_by_host):
+         # Look for previous endpoints that are no longer present...
+-        for hostname, ep_ids in old_endpoints_by_host.iteritems():
++        for hostname, ep_ids in old_endpoints_by_host.items():
+             LOG.info("host: %s", hostname)
+             # Check for particular endpoints that have disappeared, and
+             # signal those.
+RefactoringTool: No changes to ./networking_calico/plugins/ml2/drivers/calico/subnets.py
+RefactoringTool: Refactored ./networking_calico/plugins/ml2/drivers/calico/syncer.py
+--- ./networking_calico/plugins/ml2/drivers/calico/syncer.py	(original)
++++ ./networking_calico/plugins/ml2/drivers/calico/syncer.py	(refactored)
+@@ -153,7 +153,7 @@
+
+         LOG.info("Resync for %s; got etcd data, look for deletions...",
+                  self.resource_kind)
+-        for name, neutron_data in neutron_map.iteritems():
++        for name, neutron_data in neutron_map.items():
+             # Skip this name if we already handled it above - i.e. if we
+             # already had data for it in etcd.
+             if name in names_compared:
+RefactoringTool: Refactored ./networking_calico/plugins/ml2/drivers/calico/test/lib.py
+--- ./networking_calico/plugins/ml2/drivers/calico/test/lib.py	(original)
++++ ./networking_calico/plugins/ml2/drivers/calico/test/lib.py	(refactored)
+@@ -485,7 +485,7 @@
+             # full time that we've been asked for, or the time at which the
+             # next sleeper should wake up, whichever of those is earlier.
+             wake_up_time = self.current_time + secs
+-            for queue in self.sleepers.keys():
++            for queue in list(self.sleepers.keys()):
+                 if self.sleepers[queue] < wake_up_time:
+                     # This sleeper will wake up before the time that we've been
+                     # asked to advance to.
+@@ -497,7 +497,7 @@
+             _log.info("T=%s", self.current_time)
+
+             # Wake up all sleepers that should now wake up.
+-            for queue in self.sleepers.keys():
++            for queue in list(self.sleepers.keys()):
+                 if self.sleepers[queue] <= self.current_time:
+                     _log.info("T=%s >= %s: %s: Wake up!",
+                               self.current_time,
+@@ -531,7 +531,7 @@
+         if filters is None:
+             return self.osdb_ports
+
+-        assert filters.keys() == ['id']
++        assert list(filters.keys()) == ['id']
+         allowed_ids = set(filters['id'])
+
+         return [p for p in self.osdb_ports if p['id'] in allowed_ids]
+@@ -580,7 +580,7 @@
+         if filters is None:
+             return self.port_security_group_bindings
+
+-        assert filters.keys() == ['port_id']
++        assert list(filters.keys()) == ['port_id']
+         allowed_ids = set(filters['port_id'])
+
+         return [b for b in self.port_security_group_bindings
+RefactoringTool: No changes to ./networking_calico/plugins/ml2/drivers/calico/test/stub_etcd.py
+RefactoringTool: No changes to ./networking_calico/plugins/ml2/drivers/calico/test/test_compaction.py
+RefactoringTool: Refactored ./networking_calico/plugins/ml2/drivers/calico/test/test_election.py
+--- ./networking_calico/plugins/ml2/drivers/calico/test/test_election.py	(original)
++++ ./networking_calico/plugins/ml2/drivers/calico/test/test_election.py	(refactored)
+@@ -262,12 +262,12 @@
+             [
+                 mock.call({
+                     'compare': [{
+-                        'value': u'c2VydmVyLWlkOjEyMzQ=',
++                        'value': 'c2VydmVyLWlkOjEyMzQ=',
+                         'result': 'EQUAL',
+-                        'key': u'L2Jsb29w',
++                        'key': 'L2Jsb29w',
+                         'target': 'VALUE'}],
+                     'success': [{
+-                        'request_delete_range': {'key': u'L2Jsb29w'}}],
++                        'request_delete_range': {'key': 'L2Jsb29w'}}],
+                     'failure': []
+                 })
+             ],
+RefactoringTool: Refactored ./networking_calico/plugins/ml2/drivers/calico/test/test_plugin_etcd.py
+--- ./networking_calico/plugins/ml2/drivers/calico/test/test_plugin_etcd.py	(original)
++++ ./networking_calico/plugins/ml2/drivers/calico/test/test_plugin_etcd.py	(refactored)
+@@ -145,7 +145,7 @@
+         _log.info("etcd delete: %s", key)
+         if kwargs.get('recursive', False):
+             keylen = len(key) + 1
+-            for k in self.etcd_data.keys():
++            for k in list(self.etcd_data.keys()):
+                 if k == key or k[:keylen] == key + '/':
+                     del self.etcd_data[k]
+             self.recent_deletes.add(key + '(recursive)')
+@@ -183,7 +183,7 @@
+             decoded_end = _decode(range_end)
+             _log.info("Ranged get %s...%s", key, decoded_end)
+             assert revision is not None
+-            keys = self.etcd_data.keys()
++            keys = list(self.etcd_data.keys())
+             keys.sort()
+             if sort_order == "descend":
+                 keys.reverse()
+@@ -212,7 +212,7 @@
+     def etcd3_get_prefix(self, prefix):
+         self.maybe_reset_etcd()
+         results = []
+-        for key, value in self.etcd_data.items():
++        for key, value in list(self.etcd_data.items()):
+             if key.startswith(prefix):
+                 result = (value, {'mod_revision': 0, 'key': key})
+                 results.append(result)
+@@ -230,7 +230,7 @@
+
+     def etcd3_delete_prefix(self, prefix):
+         _log.info("etcd3 delete prefix: %s", prefix)
+-        for key, value in self.etcd_data.items():
++        for key, value in list(self.etcd_data.items()):
+             if key.startswith(prefix):
+                 del self.etcd_data[key]
+                 _log.info("etcd3 deleted %s", key)
+@@ -286,7 +286,7 @@
+             read_result.children = []
+             read_result.leaves = []
+             keylen = len(key) + 1
+-            for k in self.etcd_data.keys():
++            for k in list(self.etcd_data.keys()):
+                 if k[:keylen] == key + '/':
+                     child = mock.Mock()
+                     child.key = k
+@@ -299,7 +299,7 @@
+             # Needed for status_dir, where children are dirs and
+             # needs to be iterated.
+             read_result._children = []
+-            list_of_statuses = [{"key": K} for K in self.etcd_data.keys()]
++            list_of_statuses = [{"key": K} for K in list(self.etcd_data.keys())]
+             read_result._children.append({"nodes": list_of_statuses})
+         else:
+             read_result.children = None
+@@ -1167,7 +1167,7 @@
+
+     def test_neutron_rule_to_etcd_rule_protocol_name(self):
+         for neutron_protocol_spec, calico_protocol_spec in \
+-                lib.m_compat.IP_PROTOCOL_MAP.items():
++                list(lib.m_compat.IP_PROTOCOL_MAP.items()):
+             self.assertNeutronToEtcd(_neutron_rule_from_dict({
+                 "protocol": neutron_protocol_spec,
+             }), {
+RefactoringTool: No changes to ./networking_calico/tests/base.py
+RefactoringTool: No changes to ./networking_calico/tests/py3_test_dhcp_agent.py
+RefactoringTool: No changes to ./networking_calico/tests/py3_test_subnet_watcher.py
+RefactoringTool: No changes to ./networking_calico/tests/test_common.py
+RefactoringTool: No changes to ./networking_calico/tests/test_datamodel_v1.py
+RefactoringTool: No changes to ./networking_calico/tests/test_datamodel_v3.py
+RefactoringTool: Refactored ./networking_calico/tests/test_etcdutils.py
+--- ./networking_calico/tests/test_etcdutils.py	(original)
++++ ./networking_calico/tests/test_etcdutils.py	(refactored)
+@@ -77,7 +77,7 @@
+         m_response.action = self.action
+         self.dispatcher.handle_event(m_response)
+         exp_handlers = self.handlers[self.expected_handlers]
+-        for handler_key, handler in exp_handlers.iteritems():
++        for handler_key, handler in exp_handlers.items():
+             assert isinstance(handler, Mock)
+             if handler_key == exp_handler:
+                 continue
+@@ -85,7 +85,7 @@
+                              "Unexpected set handler %s was called for "
+                              "key %s" % (handler_key, key))
+         unexp_handlers = self.handlers[self.unexpected_handlers]
+-        for handler_key, handler in unexp_handlers.iteritems():
++        for handler_key, handler in unexp_handlers.items():
+             assert isinstance(handler, Mock)
+             self.assertFalse(handler.called,
+                              "Unexpected del handler %s was called for "
+@@ -130,8 +130,8 @@
+         m_result.key = "/a"
+         m_result.action = "unknown"
+         self.dispatcher.handle_event(m_result)
+-        for handlers in self.handlers.itervalues():
+-            for key, handler in handlers.iteritems():
++        for handlers in self.handlers.values():
++            for key, handler in handlers.items():
+                 self.assertFalse(handler.called,
+                                  msg="Unexpected handler called: %s" % key)
+
+RefactoringTool: No changes to ./networking_calico/tests/test_etcdv3.py
+RefactoringTool: Refactored ./networking_calico/tests/test_fv_etcdutils.py
+--- ./networking_calico/tests/test_fv_etcdutils.py	(original)
++++ ./networking_calico/tests/test_fv_etcdutils.py	(refactored)
+@@ -19,7 +19,7 @@
+ Tests for etcdutils with a real etcd server.
+ """
+
+-from __future__ import print_function
++
+
+ import logging
+ import os
+RefactoringTool: No changes to ./networking_calico/tests/test_interface_driver.py
+RefactoringTool: No changes to ./networking_calico/tests/test_monotonic.py
+RefactoringTool: No changes to ./networking_calico/tests/test_networking_calico.py
+RefactoringTool: Files that were modified:
+RefactoringTool: ./setup.py
+RefactoringTool: ./networking_calico/compat.py
+RefactoringTool: ./networking_calico/datamodel_v1.py
+RefactoringTool: ./networking_calico/datamodel_v2.py
+RefactoringTool: ./networking_calico/datamodel_v3.py
+RefactoringTool: ./networking_calico/etcdutils.py
+RefactoringTool: ./networking_calico/etcdv3.py
+RefactoringTool: ./networking_calico/logutils.py
+RefactoringTool: ./networking_calico/monotonic.py
+RefactoringTool: ./networking_calico/timestamp.py
+RefactoringTool: ./networking_calico/agent/dhcp_agent.py
+RefactoringTool: ./networking_calico/agent/linux/dhcp.py
+RefactoringTool: ./networking_calico/agent/linux/interface.py
+RefactoringTool: ./networking_calico/common/__init__.py
+RefactoringTool: ./networking_calico/common/config.py
+RefactoringTool: ./networking_calico/plugins/calico/plugin.py
+RefactoringTool: ./networking_calico/plugins/ml2/drivers/calico/election.py
+RefactoringTool: ./networking_calico/plugins/ml2/drivers/calico/endpoints.py
+RefactoringTool: ./networking_calico/plugins/ml2/drivers/calico/mech_calico.py
+RefactoringTool: ./networking_calico/plugins/ml2/drivers/calico/policy.py
+RefactoringTool: ./networking_calico/plugins/ml2/drivers/calico/status.py
+RefactoringTool: ./networking_calico/plugins/ml2/drivers/calico/subnets.py
+RefactoringTool: ./networking_calico/plugins/ml2/drivers/calico/syncer.py
+RefactoringTool: ./networking_calico/plugins/ml2/drivers/calico/test/lib.py
+RefactoringTool: ./networking_calico/plugins/ml2/drivers/calico/test/stub_etcd.py
+RefactoringTool: ./networking_calico/plugins/ml2/drivers/calico/test/test_compaction.py
+RefactoringTool: ./networking_calico/plugins/ml2/drivers/calico/test/test_election.py
+RefactoringTool: ./networking_calico/plugins/ml2/drivers/calico/test/test_plugin_etcd.py
+RefactoringTool: ./networking_calico/tests/base.py
+RefactoringTool: ./networking_calico/tests/py3_test_dhcp_agent.py
+RefactoringTool: ./networking_calico/tests/py3_test_subnet_watcher.py
+RefactoringTool: ./networking_calico/tests/test_common.py
+RefactoringTool: ./networking_calico/tests/test_datamodel_v1.py
+RefactoringTool: ./networking_calico/tests/test_datamodel_v3.py
+RefactoringTool: ./networking_calico/tests/test_etcdutils.py
+RefactoringTool: ./networking_calico/tests/test_etcdv3.py
+RefactoringTool: ./networking_calico/tests/test_fv_etcdutils.py
+RefactoringTool: ./networking_calico/tests/test_interface_driver.py
+RefactoringTool: ./networking_calico/tests/test_monotonic.py
+RefactoringTool: ./networking_calico/tests/test_networking_calico.py
+
+Compilation finished at Tue May 19 14:28:06

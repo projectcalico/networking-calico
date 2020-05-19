@@ -19,7 +19,7 @@ test_fv_etcdutils
 Tests for etcdutils with a real etcd server.
 """
 
-from __future__ import print_function
+
 
 import logging
 import os

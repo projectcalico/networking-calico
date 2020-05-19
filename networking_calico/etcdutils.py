@@ -22,6 +22,7 @@ from etcd3gw.exceptions import ConnectionFailedError
 from networking_calico.compat import log
 from networking_calico import etcdv3
 from networking_calico.monotonic import monotonic_time
+import sys
 
 LOG = log.getLogger(__name__)
 
@@ -45,7 +46,7 @@ WATCH_TIMEOUT_SECS = 10
 # https://stackoverflow.com/questions/4232111/stringtype-and-nonetype-in-python3-x.
 def _is_string_instance(obj):
     try:
-        return isinstance(obj, basestring)
+        return isinstance(obj, str)
     except NameError:
         return isinstance(obj, str)
 
@@ -405,13 +406,13 @@ def intern_dict(d, fields_to_intern=None):
     """
     fields_to_intern = fields_to_intern or set()
     out = {}
-    for k, v in d.iteritems():
+    for k, v in d.items():
         # We can't intern unicode strings, as returned by etcd but all our
         # keys should be ASCII anyway.  Use the utf8 encoding just in case.
-        k = intern(k.encode("utf8"))
+        k = sys.intern(k.encode("utf8"))
         if k in fields_to_intern:
             if _is_string_instance(v):
-                v = intern(v.encode("utf8"))
+                v = sys.intern(v.encode("utf8"))
             elif isinstance(v, list):
                 v = intern_list(v)
         out[k] = v
@@ -429,7 +430,7 @@ def intern_list(l):
     out = []
     for item in l:
         if _is_string_instance(item):
-            item = intern(item.encode("utf8"))
+            item = sys.intern(item.encode("utf8"))
         out.append(item)
     return out
 

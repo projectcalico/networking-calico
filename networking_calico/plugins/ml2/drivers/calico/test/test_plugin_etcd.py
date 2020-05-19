@@ -145,7 +145,7 @@ class _TestEtcdBase(lib.Lib, unittest.TestCase):
         _log.info("etcd delete: %s", key)
         if kwargs.get('recursive', False):
             keylen = len(key) + 1
-            for k in self.etcd_data.keys():
+            for k in list(self.etcd_data.keys()):
                 if k == key or k[:keylen] == key + '/':
                     del self.etcd_data[k]
             self.recent_deletes.add(key + '(recursive)')
@@ -183,7 +183,7 @@ class _TestEtcdBase(lib.Lib, unittest.TestCase):
             decoded_end = _decode(range_end)
             _log.info("Ranged get %s...%s", key, decoded_end)
             assert revision is not None
-            keys = self.etcd_data.keys()
+            keys = list(self.etcd_data.keys())
             keys.sort()
             if sort_order == "descend":
                 keys.reverse()
@@ -212,7 +212,7 @@ class _TestEtcdBase(lib.Lib, unittest.TestCase):
     def etcd3_get_prefix(self, prefix):
         self.maybe_reset_etcd()
         results = []
-        for key, value in self.etcd_data.items():
+        for key, value in list(self.etcd_data.items()):
             if key.startswith(prefix):
                 result = (value, {'mod_revision': 0, 'key': key})
                 results.append(result)
@@ -230,7 +230,7 @@ class _TestEtcdBase(lib.Lib, unittest.TestCase):
 
     def etcd3_delete_prefix(self, prefix):
         _log.info("etcd3 delete prefix: %s", prefix)
-        for key, value in self.etcd_data.items():
+        for key, value in list(self.etcd_data.items()):
             if key.startswith(prefix):
                 del self.etcd_data[key]
                 _log.info("etcd3 deleted %s", key)
@@ -286,7 +286,7 @@ class _TestEtcdBase(lib.Lib, unittest.TestCase):
             read_result.children = []
             read_result.leaves = []
             keylen = len(key) + 1
-            for k in self.etcd_data.keys():
+            for k in list(self.etcd_data.keys()):
                 if k[:keylen] == key + '/':
                     child = mock.Mock()
                     child.key = k
@@ -299,7 +299,7 @@ class _TestEtcdBase(lib.Lib, unittest.TestCase):
             # Needed for status_dir, where children are dirs and
             # needs to be iterated.
             read_result._children = []
-            list_of_statuses = [{"key": K} for K in self.etcd_data.keys()]
+            list_of_statuses = [{"key": K} for K in list(self.etcd_data.keys())]
             read_result._children.append({"nodes": list_of_statuses})
         else:
             read_result.children = None
@@ -1167,7 +1167,7 @@ class TestPluginEtcd(TestPluginEtcdBase):
 
     def test_neutron_rule_to_etcd_rule_protocol_name(self):
         for neutron_protocol_spec, calico_protocol_spec in \
-                lib.m_compat.IP_PROTOCOL_MAP.items():
+                list(lib.m_compat.IP_PROTOCOL_MAP.items()):
             self.assertNeutronToEtcd(_neutron_rule_from_dict({
                 "protocol": neutron_protocol_spec,
             }), {
