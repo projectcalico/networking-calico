@@ -36,6 +36,7 @@ import eventlet
 from eventlet.queue import PriorityQueue
 from eventlet.semaphore import Semaphore
 from neutron.agent import rpc as agent_rpc
+import sys
 
 try:
     from neutron_lib.agent import topics
@@ -444,7 +445,7 @@ class CalicoMechanismDriver(mech_agent.SimpleAgentMechanismDriverBase):
         :param status_dict: new status dict for the port or None if the
                status was deleted.
         """
-        port_status_key = (intern(hostname.encode("utf8")), port_id)
+        port_status_key = (sys.intern(hostname.encode("utf8")), port_id)
         # Unwrap the dict around the actual status.
         if status_dict is not None:
             # Update.
@@ -492,7 +493,7 @@ class CalicoMechanismDriver(mech_agent.SimpleAgentMechanismDriverBase):
                     # of the status strings.  We know the .encode() is safe
                     # because we just checked this was one of our expected
                     # strings.
-                    interned_status = intern(calico_status.encode("utf8"))
+                    interned_status = sys.intern(calico_status.encode("utf8"))
                     self._port_status_cache[port_status_key] = interned_status
                 else:
                     LOG.error("Unknown port status: %r", calico_status)

@@ -21,6 +21,7 @@ import errno
 import netaddr
 import netaddr.core
 import os
+import sys
 
 
 def validate_cidr(cidr, version):
@@ -41,7 +42,7 @@ def validate_cidr(cidr, version):
 def canonicalise_cidr(cidr, version):
     assert cidr is not None
     nw = netaddr.IPNetwork(cidr, version=version)
-    return intern(str(nw))
+    return sys.intern(str(nw))
 
 
 def mkdir_p(path):
