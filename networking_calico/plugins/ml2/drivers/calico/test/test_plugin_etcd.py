@@ -183,7 +183,7 @@ class _TestEtcdBase(lib.Lib, unittest.TestCase):
             decoded_end = _decode(range_end)
             _log.info("Ranged get %s...%s", key, decoded_end)
             assert revision is not None
-            keys = self.etcd_data.keys()
+            keys = list(self.etcd_data.keys())
             keys.sort()
             if sort_order == "descend":
                 keys.reverse()

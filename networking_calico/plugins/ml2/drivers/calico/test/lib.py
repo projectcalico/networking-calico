@@ -534,7 +534,7 @@ class Lib(object):
         if filters is None:
             return self.osdb_ports
 
-        assert filters.keys() == ['id']
+        assert list(filters.keys()) == ['id']
         allowed_ids = set(filters['id'])
 
         return [p for p in self.osdb_ports if p['id'] in allowed_ids]
@@ -583,7 +583,7 @@ class Lib(object):
         if filters is None:
             return self.port_security_group_bindings
 
-        assert filters.keys() == ['port_id']
+        assert list(filters.keys()) == ['port_id']
         allowed_ids = set(filters['port_id'])
 
         return [b for b in self.port_security_group_bindings

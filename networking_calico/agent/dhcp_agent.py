@@ -279,8 +279,7 @@ class CalicoEtcdWatcher(etcdutils.EtcdWatcher):
         dns_assignments = []
         fqdn = annotations.get(datamodel_v3.ANN_KEY_FQDN)
         network_id = annotations.get(datamodel_v3.ANN_KEY_NETWORK_ID)
-        allowedIps = map(lambda e: e.split('/')[0],
-                         endpoint.get('allowedIps', []))
+        allowedIps = [e.split('/')[0] for e in endpoint.get('allowedIps', [])]
         for addrm in endpoint['ipNetworks']:
             ip_addr = addrm.split('/')[0]
             if ip_addr in allowedIps:
@@ -370,7 +369,7 @@ class CalicoEtcdWatcher(etcdutils.EtcdWatcher):
             # otherwise we would have already found it when searching by
             # subnet_id above.)
             assert new_subnets
-            network_id = new_subnets.values()[0]['network_id']
+            network_id = list(new_subnets.values())[0]['network_id']
             net = self.agent.cache.get_network_by_id(network_id)
             LOG.debug("Existing network model by network ID: %s", net)
 
@@ -391,7 +390,7 @@ class CalicoEtcdWatcher(etcdutils.EtcdWatcher):
             # Add the new subnets into the NetModel.
             assert net
             net.subnets = [s for s in net.subnets
-                           if s.id not in new_subnets] + new_subnets.values()
+                           if s.id not in new_subnets] + list(new_subnets.values())
 
             # Add (or update) the NetModel in the cache.
             LOG.debug("Net: %s", net)
