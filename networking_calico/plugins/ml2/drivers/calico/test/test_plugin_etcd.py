@@ -27,7 +27,6 @@ from etcd3gw.utils import _decode
 import eventlet
 import logging
 import mock
-import sys
 
 import networking_calico.plugins.ml2.drivers.calico.test.lib as lib
 

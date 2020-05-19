@@ -611,12 +611,16 @@ class CalicoMechanismDriver(mech_agent.SimpleAgentMechanismDriverBase):
         if self._cached_update_port_status_has_host_param is None:
             if sys.version_info[0] == 3:
                 # Python 3
-                full_arg_spec = inspect.getfullargspec(self.db.update_port_status)
+                full_arg_spec = inspect.getfullargspec(
+                    self.db.update_port_status
+                )
                 args = full_arg_spec.args
                 varkw = full_arg_spec.varkw
             else:
                 # Python 2
-                args, _, varkw, _ = inspect.getargspec(self.db.update_port_status)
+                args, _, varkw, _ = inspect.getargspec(
+                    self.db.update_port_status
+                )
             has_host_param = varkw or "host" in args
             self._cached_update_port_status_has_host_param = has_host_param
             LOG.info("update_port_status() supports host arg: %s",

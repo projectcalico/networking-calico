@@ -14,7 +14,6 @@
 
 import collections
 import eventlet
-import functools
 import json
 import re
 

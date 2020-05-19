@@ -390,7 +390,8 @@ class CalicoEtcdWatcher(etcdutils.EtcdWatcher):
             # Add the new subnets into the NetModel.
             assert net
             net.subnets = [s for s in net.subnets
-                           if s.id not in new_subnets] + list(new_subnets.values())
+                           if s.id not in new_subnets]
+            net.subnets += list(new_subnets.values())
 
             # Add (or update) the NetModel in the cache.
             LOG.debug("Net: %s", net)
