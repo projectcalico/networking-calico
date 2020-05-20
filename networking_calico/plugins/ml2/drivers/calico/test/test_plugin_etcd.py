@@ -100,6 +100,12 @@ class _TestEtcdBase(lib.Lib, unittest.TestCase):
         """
         self.maybe_reset_etcd()
 
+        try:
+            key = key.decode()
+            value = value.decode()
+        except AttributeError:
+            pass
+
         # Confirm that, if prevIndex is provided, its value is not None.
         self.assertTrue(kwargs.get('prevIndex', 0) is not None)
 
@@ -142,6 +148,10 @@ class _TestEtcdBase(lib.Lib, unittest.TestCase):
     def check_etcd_delete(self, key, **kwargs):
         """Print each etcd delete as it occurs."""
         self.maybe_reset_etcd()
+        try:
+            key = key.decode()
+        except AttributeError:
+            pass
         _log.info("etcd delete: %s", key)
         if kwargs.get('recursive', False):
             keylen = len(key) + 1
@@ -181,9 +191,13 @@ class _TestEtcdBase(lib.Lib, unittest.TestCase):
         if range_end is not None:
             # Ranged get...
             decoded_end = _decode(range_end)
+            try:
+                decoded_end = decoded_end.decode()
+            except AttributeError:
+                pass
             _log.info("Ranged get %s...%s", key, decoded_end)
             assert revision is not None
-            keys = self.etcd_data.keys()
+            keys = list(self.etcd_data.keys())
             keys.sort()
             if sort_order == "descend":
                 keys.reverse()
@@ -230,7 +244,7 @@ class _TestEtcdBase(lib.Lib, unittest.TestCase):
 
     def etcd3_delete_prefix(self, prefix):
         _log.info("etcd3 delete prefix: %s", prefix)
-        for key, value in self.etcd_data.items():
+        for key, value in list(self.etcd_data.items()):
             if key.startswith(prefix):
                 del self.etcd_data[key]
                 _log.info("etcd3 deleted %s", key)
@@ -1686,7 +1700,8 @@ class TestStatusWatcher(TestStatusWatcherBase):
         lib.m_compat.cfg.CONF.calico.etcd_key_file = "key-file"
         self.watcher = status.StatusWatcher(self.driver)
 
-    def test_snapshot(self):
+    @mock.patch('eventlet.spawn')
+    def test_snapshot(self, m_spawn):
         # Populate initial status tree data, for initial snapshot testing.
 
         felix_status_key = '/calico/felix/v2/no-region/host/hostname/status'
