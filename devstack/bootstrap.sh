@@ -170,7 +170,7 @@ sudo chown -R stack:stack /opt/stack
 ls -la /opt/stack
 
 # Stack!
-sudo -u stack -i bash -c 'cd devstack && ./stack.sh'
+sudo -u stack -E -i bash -c 'cd devstack && ./stack.sh'
 
 # If we're on the controller node and not setting up for Tempest, create a
 # Calico network.
