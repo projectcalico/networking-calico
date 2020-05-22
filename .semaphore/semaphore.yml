@@ -35,7 +35,7 @@ blocks:
             - sudo apt-get install -y python-all-dev python3-all-dev python3-pip
             - sudo pip install tox
             - export LIBVIRT_TYPE=qemu
-            - TEMPEST=true DEVSTACK_BRANCH=stable/ussuri ./devstack/bootstrap.sh
+            - TEMPEST=true DEVSTACK_REPO=https://github.com/neiljerram/devstack.git DEVSTACK_BRANCH=stable/ussuri ./devstack/bootstrap.sh
             - source ./devstack/devstackgaterc
             - cd /opt/stack/tempest
             - export UPPER_CONSTRAINTS_FILE=https://releases.openstack.org/constraints/upper/ussuri
