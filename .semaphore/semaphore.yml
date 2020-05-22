@@ -37,7 +37,7 @@ blocks:
             - export LIBVIRT_TYPE=qemu
             - export DEVSTACK_REPO=https://github.com/neiljerram/devstack.git
             - export OPENSTACKCLIENT_REPO=https://github.com/neiljerram/python-openstackclient.git
-            - export LIBS_FROM_GIT=python-openstackclient
+            - export LIBS_FROM_GIT=python-openstackclient,python-keystoneclient
             - TEMPEST=true DEVSTACK_BRANCH=stable/ussuri ./devstack/bootstrap.sh
             - source ./devstack/devstackgaterc
             - cd /opt/stack/tempest
