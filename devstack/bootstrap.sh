@@ -161,8 +161,15 @@ NEUTRON_CREATE_INITIAL_NETWORKS=False
 EOF
 fi
 
+# Create stack user.
+sudo tools/create-stack-user.sh
+cd ..
+sudo mkdir -p /opt/stack
+sudo mv devstack /opt/stack
+sudo chown -R stack:stack /opt/stack
+
 # Stack!
-./stack.sh
+sudo -u stack -i 'cd devstack && ./stack.sh'
 
 # If we're on the controller node and not setting up for Tempest, create a
 # Calico network.
