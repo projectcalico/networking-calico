@@ -35,7 +35,7 @@ from networking_calico import etcdv3
 
 _log = logging.getLogger(__name__)
 
-ETCD_IMAGE = "quay.io/coreos/etcd:v3.3.11"
+ETCD_IMAGE = "gcr.io/etcd-development/etcd:v3.3.11"
 
 
 class TestFVEtcdutils(unittest.TestCase):
