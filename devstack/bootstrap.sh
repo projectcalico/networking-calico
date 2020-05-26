@@ -170,7 +170,7 @@ sudo chown -R stack:stack /opt/stack
 ls -la /opt/stack
 
 # Stack!
-sudo -u stack -E bash -x <<EOF
+sudo -u stack -H -E bash -x <<EOF
 
 set
 cd /opt/stack/devstack
