@@ -1035,7 +1035,7 @@ class CalicoMechanismDriver(mech_agent.SimpleAgentMechanismDriverBase):
             # Generate a cluster GUID if there isn't one already.
             if not cluster_info.get(datamodel_v3.CLUSTER_GUID):
                 cluster_info[datamodel_v3.CLUSTER_GUID] = \
-                    uuid.uuid4().get_hex()
+                    uuid.uuid4().hex
                 rewrite_cluster_info = True
 
             # Add "openstack" to the cluster type, unless there already.
