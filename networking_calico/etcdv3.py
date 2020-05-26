@@ -90,7 +90,10 @@ def get(key, with_lease=False):
     if len(results) != 1:
         raise KeyNotFound()
     value, item = results[0]
-    value = value.decode()
+    try:
+        value = value.decode()
+    except Exception:
+        pass
     if with_lease:
         lease = None
         if 'lease' in item:
