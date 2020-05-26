@@ -8,12 +8,12 @@ blocks:
   - name: 'Testing'
     task:
       jobs:
-        - name: 'Unit tests (tox)'
+        - name: 'Unit and FV tests (tox)'
           commands:
             - checkout
             - sudo apt-get install -y tox
             - tox
-        - name: 'FV (DevStack + Tempest)'
+        - name: 'Mainline ST (DevStack + Tempest) on Rocky'
           commands:
             - checkout
             - git checkout -b devstack-test
@@ -21,11 +21,19 @@ blocks:
             - ln -s `pwd` ~/calico/networking-calico
             - sudo apt-get install -y tox python-all-dev python3-all-dev
             - export LIBVIRT_TYPE=qemu
-            - TEMPEST=true TEMPEST_BRANCH=23.0.0 DEVSTACK_BRANCH=stable/rocky ./devstack/bootstrap.sh
-            - source ./devstack/devstackgaterc
-            - cd /opt/stack/tempest
             - export UPPER_CONSTRAINTS_FILE=https://releases.openstack.org/constraints/upper/rocky
-            - tox -eall -- $DEVSTACK_GATE_TEMPEST_REGEX --concurrency=$TEMPEST_CONCURRENCY
+            - TEMPEST=true TEMPEST_BRANCH=23.0.0 DEVSTACK_BRANCH=stable/rocky ./devstack/bootstrap.sh
+        - name: 'Mainline ST (DevStack + Tempest) on Ussuri'
+          commands:
+            - checkout
+            - git checkout -b devstack-test
+            - mkdir -p ~/calico
+            - ln -s `pwd` ~/calico/networking-calico
+            - sudo apt-get install -y python-all-dev python3-all-dev python3-pip
+            - sudo pip install tox
+            - export LIBVIRT_TYPE=qemu
+            - export UPPER_CONSTRAINTS_FILE=https://releases.openstack.org/constraints/upper/ussuri
+            - TEMPEST=true DEVSTACK_BRANCH=stable/ussuri ./devstack/bootstrap.sh
       epilogue:
         on_fail:
           commands:
