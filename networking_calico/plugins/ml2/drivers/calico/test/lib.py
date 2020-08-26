@@ -22,8 +22,8 @@ import eventlet
 import eventlet.queue
 import inspect
 import logging
-import mock
 import sys
+from unittest import mock
 
 # When you're working on a test and need to see logging - both from the test
 # code and the code _under_ test - uncomment the following line.
