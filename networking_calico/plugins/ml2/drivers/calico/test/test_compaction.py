@@ -17,9 +17,9 @@ Test compaction code.
 """
 
 import logging
-import mock
 import os
 import unittest
+from unittest import mock
 
 from etcd3gw.exceptions import Etcd3Exception
 
