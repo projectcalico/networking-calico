@@ -17,7 +17,7 @@ from collections import namedtuple
 import eventlet
 import json
 import logging
-import mock
+from unittest import mock
 import socket
 
 from neutron.agent.dhcp_agent import register_options

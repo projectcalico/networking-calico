@@ -17,10 +17,10 @@ Test compaction code.
 """
 
 import logging
-import mock
 import os
 import sys
 import unittest
+from unittest import mock
 
 from etcd3gw.exceptions import Etcd3Exception
 
