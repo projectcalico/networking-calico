@@ -19,7 +19,6 @@ Test compaction code.
 import logging
 import mock
 import os
-import sys
 import unittest
 
 from etcd3gw.exceptions import Etcd3Exception

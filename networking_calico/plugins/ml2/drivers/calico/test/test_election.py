@@ -21,7 +21,6 @@ from etcd3gw import exceptions as e3e
 import eventlet
 import logging
 import mock
-import sys
 import unittest
 
 from networking_calico.compat import log
