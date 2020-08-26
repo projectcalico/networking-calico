@@ -23,9 +23,9 @@ Tests for etcd utility function.
 import logging
 import unittest
 
-from unittest.mock import call
-from unittest.mock import Mock
-from unittest.mock import patch
+from mock import call
+from mock import Mock
+from mock import patch
 
 from networking_calico.etcdutils import _is_string_instance
 from networking_calico.etcdutils import EtcdWatcher

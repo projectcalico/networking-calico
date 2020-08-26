@@ -13,7 +13,7 @@
 #    under the License.
 
 import logging
-from unittest import mock
+import mock
 
 from neutron.tests import base
 

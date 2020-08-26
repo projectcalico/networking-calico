@@ -27,7 +27,7 @@ class TestConfig(unittest.TestCase):
 
 from collections import namedtuple
 import logging
-from unittest import mock
+import mock
 
 
 import networking_calico.common as common

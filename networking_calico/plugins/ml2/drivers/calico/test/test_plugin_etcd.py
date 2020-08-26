@@ -22,11 +22,11 @@ Unit test for the Calico/OpenStack Plugin using etcd transport.
 import copy
 import json
 import unittest
-from unittest import mock
 
 from etcd3gw.utils import _decode
 import eventlet
 import logging
+import mock
 
 import networking_calico.plugins.ml2.drivers.calico.test.lib as lib
 
