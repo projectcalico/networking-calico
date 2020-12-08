@@ -94,6 +94,7 @@ class Elector(object):
 
         # Is this the master? To start with, no
         self._master = False
+        self.master_id = None
 
         # Keep the greenlet ID handy to ease UT.
         self._greenlet = eventlet.spawn(self._run)
@@ -154,6 +155,7 @@ class Elector(object):
         if value:
             # If we happen to be on the same server, check if the master
             # process is still alive.
+            self.master_id = value
             self._check_master_process(value)
 
         while not self._stopped:
