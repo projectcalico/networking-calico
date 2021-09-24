@@ -30,6 +30,10 @@ blocks:
             - ln -s `pwd` ~/calico/networking-calico
             - export LIBVIRT_TYPE=qemu
             - export UPPER_CONSTRAINTS_FILE=https://releases.openstack.org/constraints/upper/ussuri
+            # Disable initramfs update, as it means we run out of space on the Semaphore
+            # VM (and we don't need it because we're not going to reboot).
+            - sudo crudini --set /etc/initramfs-tools/update-initramfs.conf update_initramfs no
+            - cat /etc/initramfs-tools/update-initramfs.conf
             - TEMPEST=true DEVSTACK_BRANCH=stable/ussuri ./devstack/bootstrap.sh
       epilogue:
         on_fail:
