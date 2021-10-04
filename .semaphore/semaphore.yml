@@ -34,6 +34,8 @@ blocks:
             - ln -s `pwd` ~/calico/networking-calico
             - export LIBVIRT_TYPE=qemu
             - export UPPER_CONSTRAINTS_FILE=https://releases.openstack.org/constraints/upper/ussuri
+            - export REQUIREMENTS_REPO=https://github.com/neiljerram/requirements.git
+            - export REQUIREMENTS_BRANCH=pin-setuptools
             - TEMPEST=true DEVSTACK_BRANCH=stable/ussuri ./devstack/bootstrap.sh
       epilogue:
         on_fail:
